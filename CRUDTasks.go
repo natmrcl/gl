@@ -12,8 +12,15 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type Habits struct {
-	HabitID string `json:"HabitID"`
+type Habit struct {
+	HabitID           string
+	HabitName         string
+	HabitDescription  string
+	StartDate         time.Time
+	EndDate           time.Time
+	ReminderTime      time.Time
+	ReminderFrequency int
+	UserID            string
 }
 
 func newTask(taskName string, PriorityLevel int8, userID string, year int, month int, day int, hour int, min int, db *sql.DB) {
@@ -43,6 +50,26 @@ func newTask(taskName string, PriorityLevel int8, userID string, year int, month
 	fmt.Println(results, task)
 }
 
+func CreateHabit(db *sql.DB, habit Habit) (int64, error) {
+	stmt, err := db.Prepare("INSERT INTO habit(HabitName, HabitDescription, StartDate, EndDate, ReminderTime, ReminderFrequency, User_UserID) VALUES(?,?,?,?,?,?,?,?)")
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(habit.HabitID, habit.HabitName, habit.HabitDescription, habit.StartDate, habit.EndDate, habit.ReminderTime, habit.ReminderFrequency, habit.UserID)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}
+
 func main() {
 	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/habimate")
 	if err != nil {
@@ -66,6 +93,25 @@ func main() {
 		// Function new task
 	} else if strings.Compare(str, "2") == 0 {
 		// Function new habit
+		// contoh test
+		// habit := Habit{
+		// 	HabitID:           "H0001",
+		// 	HabitName:         "Reading",
+		// 	HabitDescription:  "Do some reading every night",
+		// 	StartDate:         time.Now(),
+		// 	EndDate:           time.Now().AddDate(0, 0, 7),
+		// 	ReminderTime:      time.Now().Add(time.Hour),
+		// 	ReminderFrequency: 2,
+		// 	UserID:            "U0001",
+		// }
+
+		// rowsAffected, err := CreateHabit(db, habit)
+		// if err != nil {
+		// 	fmt.Println(err)
+		// } else {
+		// 	fmt.Println("Data Succesfully Add")
+		// 	fmt.Printf("Rows affected: %d\n", rowsAffected)
+		// }
 	}
 
 }
