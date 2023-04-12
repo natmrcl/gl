@@ -1,0 +1,74 @@
+package main
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"time"
+
+	_ "github.com/go-sql-driver/mysql"
+)
+
+type Habit struct {
+	HabitID           string
+	HabitName         string
+	HabitDescription  string
+	StartDate         time.Time
+	EndDate           time.Time
+	ReminderTime      time.Time
+	ReminderFrequency int
+	UserID            string
+}
+
+func CreateHabit(db *sql.DB, habit Habit) (int64, error) {
+	stmt, err := db.Prepare("INSERT INTO habit(HabitID, HabitName, HabitDescription, StartDate, EndDate, ReminderTime, ReminderFrequency, User_UserID) VALUES(?,?,?,?,?,?,?,?)")
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+
+	result, err := stmt.Exec(habit.HabitID, habit.HabitName, habit.HabitDescription, habit.StartDate, habit.EndDate, habit.ReminderTime, habit.ReminderFrequency, habit.UserID)
+	if err != nil {
+		return 0, err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}
+
+func main() {
+	db, err := sql.Open("mysql", "root:@tcp(127.0.0.1:3306)/habimate")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// Test connection
+	err = db.Ping()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Connected to the database")
+
+	habit := Habit{
+		HabitID:           "H0002",
+		HabitName:         "Reading",
+		HabitDescription:  "Do some reading every night",
+		StartDate:         time.Now(),
+		EndDate:           time.Now().AddDate(0, 0, 7),
+		ReminderTime:      time.Now().Add(time.Hour),
+		ReminderFrequency: 2,
+		UserID:            "U0001",
+	}
+
+	rowsAffected, err := CreateHabit(db, habit)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println("Data Succesfully Add")
+		fmt.Printf("Rows affected: %d\n", rowsAffected)
+	}
