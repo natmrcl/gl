@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"database/CRUDtypes"
 	"database/sql"
 	"fmt"
-	"os"
-	"strings"
+	"strconv"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -87,11 +85,17 @@ func main() {
 	fmt.Println("Database connection successful")
 
 	fmt.Println("Please Select a function:\n1.Create a new task\n2.Create a new habit.")
-	reader := bufio.NewReader(os.Stdin)
-	str, err := reader.ReadString('\n')
-	if strings.Compare(str, "1") == 0 {
+	// reader := bufio.NewReader(os.Stdin)
+	// str, prefix, err := reader.ReadLine()
+	// fmt.Println(str, prefix)
+	var str string
+	fmt.Scanln(&str)
+
+	choice, err := strconv.Atoi(str)
+	if choice == 1 {
 		// Function new task
-	} else if strings.Compare(str, "2") == 0 {
+
+	} else if choice == 2 {
 		// Function new habit
 		// contoh test
 		// habit := Habit{
